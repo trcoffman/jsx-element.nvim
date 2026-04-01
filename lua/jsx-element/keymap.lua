@@ -1,18 +1,25 @@
 local M = {}
 
+local select = require('nvim-treesitter-textobjects.select')
+local move = require('nvim-treesitter-textobjects.move')
+
 ---@param preposition 'inner' | 'outer'
 ---@param node 'string'
----@return string
+---@return function
 local function textobject_cmd(preposition, node)
-  return ('<cmd>TSTextobjectSelect @%s.%s<CR>'):format(node, preposition)
+  return function()
+    select.select_textobject('@' .. node .. '.' .. preposition, 'textobjects')
+  end
 end
 
 ---@param direction 'next' | 'prev'
 ---@param node 'string'
----@return string
+---@return function
 local function goto_cmd(direction, node)
-  local pascal_cased_direction = direction == 'next' and 'Next' or 'Previous'
-  return ('<cmd>TSTextobjectGoto%sStart @%s.outer<CR>'):format(pascal_cased_direction, node)
+  local goto_start = direction == 'next' and move.goto_next_start or move.goto_previous_start
+  return function()
+    goto_start('@' .. node .. '.outer', 'textobjects')
+  end
 end
 
 ---@param event vim.api.keyset.create_autocmd.callback_args
@@ -30,6 +37,7 @@ local function textobject_map(event, keys)
 
     vim.keymap.set(xo, 'i' .. key, textobject_cmd('inner', node), opts(('Inside %s'):format(name)))
     vim.keymap.set(xo, 'a' .. key, textobject_cmd('outer', node), opts(('Around %s'):format(name)))
+
     vim.keymap.set(n, ']' .. key, goto_cmd('next', node), opts(('Go to next %s'):format(name)))
     vim.keymap.set(n, '[' .. key, goto_cmd('prev', node), opts(('Go to previous %s'):format(name)))
   end
