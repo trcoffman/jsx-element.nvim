@@ -1,20 +1,12 @@
 ; extends
 
-; Self closing tags
-(jsx_self_closing_element
-  name: (identifier)
-  .
-  (_) @_start
-  (_)* @_end
-  .
-  (#make-range! "jsx_element.inner" @_start @_end)) @jsx_element.outer
+; Self closing tags — no meaningful inner range, outer only
+(jsx_self_closing_element) @jsx_element.outer @jsx_element.inner
 
-; Paired tags
+; Paired tags — outer is the whole element, inner is children between tags
+(jsx_element) @jsx_element.outer
+
 (jsx_element
   open_tag: (_)
-  .
-  (_) @_start
-  (_)* @_end
-  .
-  close_tag: (_)
-  (#make-range! "jsx_element.inner" @_start @_end)) @jsx_element.outer
+  (_)+ @jsx_element.inner
+  close_tag: (_))
