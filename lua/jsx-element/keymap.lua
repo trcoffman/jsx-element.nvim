@@ -1,14 +1,11 @@
 local M = {}
 
-local select = require('nvim-treesitter-textobjects.select')
-local move = require('nvim-treesitter-textobjects.move')
-
 ---@param preposition 'inner' | 'outer'
 ---@param node 'string'
 ---@return function
 local function textobject_cmd(preposition, node)
   return function()
-    select.select_textobject('@' .. node .. '.' .. preposition, 'textobjects')
+    require('nvim-treesitter-textobjects.select').select_textobject('@' .. node .. '.' .. preposition, 'textobjects')
   end
 end
 
@@ -16,8 +13,9 @@ end
 ---@param node 'string'
 ---@return function
 local function goto_cmd(direction, node)
-  local goto_start = direction == 'next' and move.goto_next_start or move.goto_previous_start
   return function()
+    local move = require('nvim-treesitter-textobjects.move')
+    local goto_start = direction == 'next' and move.goto_next_start or move.goto_previous_start
     goto_start('@' .. node .. '.outer', 'textobjects')
   end
 end
